@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kopi Nako — Manajemen Shift Karyawan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Montserrat:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- =========================================================
+     VIEW 1 — LOGIN
+     ========================================================= -->
+    <section class="view active" id="view-login">
+        <div class="auth-card">
+            <div class="auth-visual" role="img" aria-label="Suasana kedai kopi Kopi Nako">
+                <div class="visual-brand"><span class="mark">☕</span><span>Kopi Nako</span></div>
+                <div class="visual-copy">
+                    <h1>Selamat Datang di Kopi Nako</h1>
+                    <p>Kelola jadwal shift dan tim Anda dengan lebih mudah, dalam satu tempat</p>
+                </div>
+            </div>
+
+            <div class="auth-form-panel">
+                <form class="auth-form" id="loginForm" novalidate>
+                    <div class="form-brand"><span class="mark">☕</span><span>Kopi Nako</span></div>
+                    <div class="icon-badge" aria-hidden="true">☕</div>
+                    <h2>Selamat Datang Kembali</h2>
+                    <p class="sub">Masuk ke akun Anda untuk melanjutkan mengelola tim</p>
+
+                    <div class="field">
+                        <label for="email">Alamat Email</label>
+                        <div class="input-wrap" id="emailWrap">
+                            <span class="field-icon" aria-hidden="true">✉</span>
+                            <input type="text" id="email" name="email" placeholder="contoh: juandi@kopinako.com"
+                                autocomplete="username">
+                        </div>
+                        <div class="field-error" id="emailError">Alamat email tidak boleh kosong.</div>
+                    </div>
+
+                    <div class="field">
+                        <label for="password">Kata Sandi</label>
+                        <div class="input-wrap" id="passWrap">
+                            <span class="field-icon" aria-hidden="true">🔒</span>
+                            <input type="password" id="password" name="password" placeholder="Masukkan kata sandi"
+                                autocomplete="current-password">
+                            <button type="button" class="toggle-pass" id="togglePass"
+                                aria-label="Tampilkan kata sandi">Lihat</button>
+                        </div>
+                        <div class="field-error" id="passError">Kata sandi minimal 6 karakter.</div>
+                    </div>
+
+                    <div class="row-between">
+                        <label class="remember"><input type="checkbox" id="remember"> Ingat Saya</label>
+                        <a href="#" id="forgotLink">Lupa Kata Sandi?</a>
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="submitBtn">
+                        <span class="spinner" id="spinner" aria-hidden="true"></span>
+                        <span id="submitLabel">Masuk</span>
+                    </button>
+
+                    <p class="foot-note">Belum punya akun? <strong>Hubungi Supervisor</strong></p>
+                    <div class="role-hint">Simulasi login — gunakan email apa saja. Akun karyawan (Karyawan,
+                        Leader/Head, Supervisor) dibuatkan langsung oleh Supervisor.</div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================
+     VIEW 2 — APP SHELL (Sidebar + Topbar + Dashboard/Jadwal/Pengajuan)
+     ========================================================= -->
+    <section class="view" id="view-app">
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+        <aside class="sidebar" id="sidebar">
+            <div class="sb-brand">
+                <span class="mark">☕</span>
+                <div class="sb-brand-text"><span class="name">Kopi Nako</span><span class="sub">Manajemen Shift
+                        Karyawan</span></div>
+            </div>
+            <ul class="sb-nav">
+                <li><a href="#" class="nav-link active" data-page="dashboard"><span class="ic">▦</span> Dashboard</a>
+                </li>
+                <li><a href="#" class="nav-link" data-page="jadwal"><span class="ic">🗓</span> Jadwal Shift</a></li>
+                <li><a href="#" class="nav-link" data-page="pengajuan"><span class="ic">↔</span> Pengajuan
+                        Izin/Tukar</a></li>
+            </ul>
+            <div class="sb-foot">Kopi Nako Pamulang<br>© 2026 — Internal System</div>
+        </aside>
+
+        <div class="app-main">
+            <header class="topbar">
+                <button class="hamburger" id="hamburgerBtn" aria-label="Buka menu">☰</button>
+                <div class="search-bar">
+                    <span class="ic">🔍</span>
+                    <input type="text" placeholder="Cari karyawan, jadwal, pengajuan...">
+                </div>
+                <div class="topbar-spacer"></div>
+                <button class="icon-btn" aria-label="Notifikasi">🔔<span class="dot"></span></button>
+                <div class="profile-menu" id="profileMenu">
+                    <button class="profile-trigger" id="profileTrigger">
+                        <span class="avatar" id="profileAvatar">SP</span>
+                        <span class="profile-text"><span class="p-name" id="profileName">Supervisor Andini</span><span
+                                class="p-role" id="profileRole">Supervisor</span></span>
+                    </button>
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <a href="#" id="settingsLink">Pengaturan Akun</a>
+                        <button class="logout-item" id="logoutTrigger">Keluar</button>
+                    </div>
+                </div>
+            </header>
+
+            <main class="content">
+
+                <!-- ===== PAGE: DASHBOARD ===== -->
+                <div class="page-view active" id="page-dashboard">
+                    <div class="page-header"
+                        style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+                        <div>
+                            <h1>Ringkasan Shift Minggu Ini</h1>
+                            <div class="date" id="todayDate"></div>
+                        </div>
+                        <button class="btn-toolbar btn-dark" id="openAddEmployeeBtn" style="padding:10px 18px;">+ Tambah
+                            Karyawan</button>
+                    </div>
+
+                    <div class="stat-grid">
+                        <div class="stat-card">
+                            <div class="ic">👥</div>
+                            <div class="num">24</div>
+                            <div class="lbl">Karyawan Aktif</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="ic">☕</div>
+                            <div class="num">9</div>
+                            <div class="lbl">Shift Berjalan Hari Ini</div>
+                        </div>
+                        <div class="stat-card warn">
+                            <div class="ic">⏳</div>
+                            <div class="num">6</div>
+                            <div class="lbl">Pengajuan Menunggu</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="ic">✓</div>
+                            <div class="num">31</div>
+                            <div class="lbl">Disetujui Bulan Ini</div>
+                        </div>
+                        <div class="stat-card muted-ic">
+                            <div class="ic">◌</div>
+                            <div class="num">2</div>
+                            <div class="lbl">Karyawan Tidak Aktif</div>
+                        </div>
+                    </div>
+
+                    <div class="grid-2col">
+                        <div class="col">
+                            <div class="panel">
+                                <h3 class="panel-title">Aktivitas Pengajuan Shift</h3>
+                                <div class="chart-wrap" id="chartWrap"></div>
+                            </div>
+
+                            <div class="panel">
+                                <h3 class="panel-title">Pengajuan Izin/Tukar Shift</h3>
+                                <div style="overflow-x:auto;">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Karyawan</th>
+                                                <th>Jenis</th>
+                                                <th>Tanggal</th>
+                                                <th>Shift Tujuan</th>
+                                                <th>Status</th>
+                                                <th>Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="requestTable">
+                                            <tr data-status="pending">
+                                                <td>Rizky Ramadhan</td>
+                                                <td>Tukar Shift</td>
+                                                <td>24 Sep 2026</td>
+                                                <td>Siang</td>
+                                                <td class="status-cell"><span class="status-dot"><span
+                                                            class="d pending"></span>Menunggu</span></td>
+                                                <td class="action-cell">
+                                                    <div class="row-actions"><button class="act-btn accept"
+                                                            title="Terima">✓</button><button class="act-btn reject"
+                                                            title="Tolak">✕</button></div>
+                                                </td>
+                                            </tr>
+                                            <tr data-status="pending">
+                                                <td>Salsabila Putri</td>
+                                                <td>Izin</td>
+                                                <td>25 Sep 2026</td>
+                                                <td>—</td>
+                                                <td class="status-cell"><span class="status-dot"><span
+                                                            class="d pending"></span>Menunggu</span></td>
+                                                <td class="action-cell">
+                                                    <div class="row-actions"><button class="act-btn accept"
+                                                            title="Terima">✓</button><button class="act-btn reject"
+                                                            title="Tolak">✕</button></div>
+                                                </td>
+                                            </tr>
+                                            <tr data-status="approved">
+                                                <td>Bagas Wirawan</td>
+                                                <td>Tukar Shift</td>
+                                                <td>22 Sep 2026</td>
+                                                <td>Malam</td>
+                                                <td class="status-cell"><span class="status-dot"><span
+                                                            class="d approved"></span>Disetujui</span></td>
+                                                <td class="action-cell"><span class="done-label">Selesai</span></td>
+                                            </tr>
+                                            <tr data-status="rejected">
+                                                <td>Nadia Kusuma</td>
+                                                <td>Izin</td>
+                                                <td>21 Sep 2026</td>
+                                                <td>—</td>
+                                                <td class="status-cell"><span class="status-dot"><span
+                                                            class="d rejected"></span>Ditolak</span></td>
+                                                <td class="action-cell"><span class="done-label">Selesai</span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col">
+                            <div class="panel">
+                                <h3 class="panel-title">Notifikasi</h3>
+                                <div class="feed-item">
+                                    <div class="f-ic">↔</div>
+                                    <div>
+                                        <div class="f-text">Rizky Ramadhan mengajukan tukar shift ke Siang</div>
+                                        <div class="f-time">12 menit lalu</div>
+                                    </div>
+                                </div>
+                                <div class="feed-item">
+                                    <div class="f-ic">✓</div>
+                                    <div>
+                                        <div class="f-text">Pengajuan tukar shift Bagas Wirawan disetujui</div>
+                                        <div class="f-time">1 jam lalu</div>
+                                    </div>
+                                </div>
+                                <div class="feed-item">
+                                    <div class="f-ic">👤</div>
+                                    <div>
+                                        <div class="f-text">Karyawan baru, Fajar Nugroho, ditambahkan ke tim</div>
+                                        <div class="f-time">3 jam lalu</div>
+                                    </div>
+                                </div>
+                                <div class="feed-item">
+                                    <div class="f-ic">✕</div>
+                                    <div>
+                                        <div class="f-text">Pengajuan izin Nadia Kusuma ditolak Supervisor</div>
+                                        <div class="f-time">Kemarin</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="panel">
+                                <h3 class="panel-title">Shift Aktif Saat Ini</h3>
+                                <div class="shift-item"><span class="avatar-sm">DP</span>
+                                    <div>
+                                        <div class="s-name">Dewi Purnama</div>
+                                        <div class="s-sub">Barista</div>
+                                    </div><span class="badge-live">02:14:20</span>
+                                </div>
+                                <div class="shift-item"><span class="avatar-sm">HA</span>
+                                    <div>
+                                        <div class="s-name">Hendra Aditya</div>
+                                        <div class="s-sub">Kasir</div>
+                                    </div><span class="badge-live">02:14:20</span>
+                                </div>
+                                <div class="shift-item"><span class="avatar-sm">MR</span>
+                                    <div>
+                                        <div class="s-name">Maya Rahmawati</div>
+                                        <div class="s-sub">Leader/Head</div>
+                                    </div><span class="badge-live">04:02:05</span>
+                                </div>
+                            </div>
+
+                            <div class="panel">
+                                <h3 class="panel-title">Jadwal Shift Hari Ini</h3>
+                                <div class="shift-item"><span class="avatar-sm">FN</span>
+                                    <div>
+                                        <div class="s-name">Fajar Nugroho</div>
+                                        <div class="s-sub">Barista</div>
+                                    </div><span class="badge-time">15.00</span>
+                                </div>
+                                <div class="shift-item"><span class="avatar-sm">SP</span>
+                                    <div>
+                                        <div class="s-name">Salsabila Putri</div>
+                                        <div class="s-sub">Kasir</div>
+                                    </div><span class="badge-time">15.00</span>
+                                </div>
+                                <div class="shift-item"><span class="avatar-sm">RR</span>
+                                    <div>
+                                        <div class="s-name">Rizky Ramadhan</div>
+                                        <div class="s-sub">Barista</div>
+                                    </div><span class="badge-time">21.00</span>
+                                </div>
+                            </div>
+
+                            <div class="panel">
+                                <h3 class="panel-title">Legenda Status</h3>
+                                <div class="legend-item"><span class="d approved"
+                                        style="width:8px;height:8px;border-radius:50%;display:inline-block;background:var(--ink);"></span>
+                                    Disetujui — dot solid hitam</div>
+                                <div class="legend-item"><span class="d pending"
+                                        style="width:8px;height:8px;border-radius:50%;display:inline-block;border:2px solid var(--muted);"></span>
+                                    Menunggu — dot outline</div>
+                                <div class="legend-item"><span class="d rejected"
+                                        style="width:8px;height:8px;border-radius:50%;display:inline-block;background:var(--accent-deep);"></span>
+                                    Ditolak — dot aksen gelap</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== PAGE: JADWAL SHIFT ===== -->
+                <div class="page-view" id="page-jadwal">
+                    <div class="page-header">
+                        <h1>Jadwal Shift</h1>
+                    </div>
+
+                    <div class="toolbar">
+                        <div class="view-toggle">
+                            <button id="btnDaily">Papan Harian</button>
+                            <button id="btnWeekly" class="active">Jadwal Mingguan</button>
+                        </div>
+                        <div class="date-nav">
+                            <button id="prevDate" aria-label="Sebelumnya">‹</button>
+                            <span class="range" id="dateRange">15 – 21 Sep 2026</span>
+                            <button id="nextDate" aria-label="Berikutnya">›</button>
+                        </div>
+                        <select class="filter-pill">
+                            <option>Semua Peran</option>
+                            <option>Barista</option>
+                            <option>Kasir</option>
+                            <option>Leader/Head</option>
+                        </select>
+                        <div class="toolbar-spacer"></div>
+                        <div class="toolbar-actions">
+                            <button class="btn-toolbar btn-ghost" id="autoScheduleBtn">Jadwalkan Otomatis</button>
+                            <button class="btn-toolbar btn-dark" id="addShiftBtn">Tambah Shift</button>
+                        </div>
+                    </div>
+
+                    <div class="jadwal-view-panel" id="dailyView">
+                        <div class="kanban">
+                            <div class="kanban-col">
+                                <div class="kanban-col-head"><span class="k-ic">☀</span><span
+                                        class="k-name">Pagi</span><span class="k-hours">09.00–15.00</span></div>
+                                <button class="kanban-assign-btn">+ Tugaskan</button>
+                                <div class="kanban-card"><span class="avatar-sm">FN</span>
+                                    <div>
+                                        <div class="k-name-sm">Fajar Nugroho</div>
+                                        <div class="k-role-sm">Barista</div>
+                                    </div>
+                                </div>
+                                <div class="kanban-card"><span class="avatar-sm">SP</span>
+                                    <div>
+                                        <div class="k-name-sm">Salsabila Putri</div>
+                                        <div class="k-role-sm">Kasir</div>
+                                    </div>
+                                </div>
+                                <div class="kanban-card"><span class="avatar-sm">MR</span>
+                                    <div>
+                                        <div class="k-name-sm">Maya Rahmawati</div>
+                                        <div class="k-role-sm">Leader/Head</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="kanban-col">
+                                <div class="kanban-col-head"><span class="k-ic">⛅</span><span
+                                        class="k-name">Siang</span><span class="k-hours">15.00–21.00</span></div>
+                                <button class="kanban-assign-btn">+ Tugaskan</button>
+                                <div class="kanban-card"><span class="avatar-sm">DP</span>
+                                    <div>
+                                        <div class="k-name-sm">Dewi Purnama</div>
+                                        <div class="k-role-sm">Barista</div>
+                                    </div>
+                                </div>
+                                <div class="kanban-card"><span class="avatar-sm">HA</span>
+                                    <div>
+                                        <div class="k-name-sm">Hendra Aditya</div>
+                                        <div class="k-role-sm">Kasir</div>
+                                    </div>
+                                </div>
+                                <div class="kanban-card"><span class="avatar-sm">RR</span>
+                                    <div>
+                                        <div class="k-name-sm">Rizky Ramadhan</div>
+                                        <div class="k-role-sm">Barista</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="kanban-col">
+                                <div class="kanban-col-head"><span class="k-ic">🌙</span><span
+                                        class="k-name">Malam</span><span class="k-hours">21.00–03.30</span></div>
+                                <button class="kanban-assign-btn">+ Tugaskan</button>
+                                <div class="kanban-card"><span class="avatar-sm">BW</span>
+                                    <div>
+                                        <div class="k-name-sm">Bagas Wirawan</div>
+                                        <div class="k-role-sm">Barista</div>
+                                    </div>
+                                </div>
+                                <div class="kanban-card"><span class="avatar-sm">NK</span>
+                                    <div>
+                                        <div class="k-name-sm">Nadia Kusuma</div>
+                                        <div class="k-role-sm">Kasir</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="jadwal-view-panel active" id="weeklyView">
+                        <div class="weekly-wrap">
+                            <table class="weekly">
+                                <thead>
+                                    <tr>
+                                        <th class="emp-cell" style="position:sticky;left:0;background:var(--surface);">
+                                            Karyawan</th>
+                                        <th>Sen<br><span class="day-date-circle">15</span></th>
+                                        <th>Sel<br><span class="day-date-circle">16</span></th>
+                                        <th>Rab<br><span class="day-date-circle">17</span></th>
+                                        <th>Kam<br><span class="day-date-circle">18</span></th>
+                                        <th class="day-today">Jum<br><span class="day-date-circle">19</span></th>
+                                        <th>Sab<br><span class="day-date-circle">20</span></th>
+                                        <th>Min<br><span class="day-date-circle">21</span></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="weeklyBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== PAGE: PENGAJUAN IZIN/TUKAR SHIFT ===== -->
+                <div class="page-view" id="page-pengajuan">
+                    <div class="page-header"
+                        style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+                        <div>
+                            <h1>Pengajuan Izin / Tukar Shift</h1>
+                            <div class="sub-h">Riwayat lengkap dan status persetujuan pengajuan karyawan</div>
+                        </div>
+                        <button class="btn-toolbar btn-dark" id="openAjukanBtn" style="padding:10px 18px;">+ Ajukan
+                            Baru</button>
+                    </div>
+
+                    <div class="stat-grid-4">
+                        <div class="stat-card">
+                            <div class="ic">📄</div>
+                            <div>
+                                <div class="num" id="statTotal">8</div>
+                                <div class="lbl">Total Diajukan</div>
+                            </div>
+                        </div>
+                        <div class="stat-card approved">
+                            <div class="ic">✓</div>
+                            <div>
+                                <div class="num" id="statApproved">4</div>
+                                <div class="lbl">Disetujui</div>
+                            </div>
+                        </div>
+                        <div class="stat-card rejected">
+                            <div class="ic">✕</div>
+                            <div>
+                                <div class="num" id="statRejected">2</div>
+                                <div class="lbl">Ditolak</div>
+                            </div>
+                        </div>
+                        <div class="stat-card pending">
+                            <div class="ic">⏳</div>
+                            <div>
+                                <div class="num" id="statPending">2</div>
+                                <div class="lbl">Menunggu</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="toolbar">
+                        <select class="filter-pill">
+                            <option>Semua Status</option>
+                            <option>Disetujui</option>
+                            <option>Menunggu</option>
+                            <option>Ditolak</option>
+                        </select>
+                        <select class="filter-pill">
+                            <option>Semua Jenis</option>
+                            <option>Izin</option>
+                            <option>Tukar Shift</option>
+                        </select>
+                        <select class="filter-pill">
+                            <option>Bulan Ini</option>
+                            <option>Bulan Lalu</option>
+                        </select>
+                        <div class="toolbar-spacer"></div>
+                        <button class="btn-toolbar btn-dark" id="approveAllBtn">Setujui Semua yang Menunggu</button>
+                    </div>
+
+                    <div class="table-panel">
+                        <div style="overflow-x:auto;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th class="th-surface">Karyawan</th>
+                                        <th class="th-surface">Jenis</th>
+                                        <th class="th-surface">Tanggal Diajukan</th>
+                                        <th class="th-surface">Tanggal Shift</th>
+                                        <th class="th-surface">Shift Tujuan</th>
+                                        <th class="th-surface">Status</th>
+                                        <th class="th-surface"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reqTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </section>
+
+    <!-- =========================================================
+     DRAWER — Detail Pengajuan (shared, di luar view agar overlay penuh)
+     ========================================================= -->
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+    <aside class="drawer" id="drawer">
+        <div class="drawer-header">
+            <h3>Detail Pengajuan</h3>
+            <button class="drawer-close" id="drawerClose">×</button>
+        </div>
+        <div class="drawer-body" id="drawerBody"></div>
+        <div class="drawer-footer" id="drawerFooter"></div>
+    </aside>
+
+    <!-- =========================================================
+     DRAWER — Form Ajukan Izin/Tukar Shift (Halaman 5, sisi Karyawan)
+     ========================================================= -->
+    <div class="drawer-overlay" id="ajukanOverlay"></div>
+    <aside class="drawer" id="ajukanDrawer">
+        <div class="drawer-header">
+            <h3>Ajukan Izin / Tukar Shift</h3>
+            <button class="drawer-close" id="ajukanClose">×</button>
+        </div>
+        <div class="drawer-body">
+            <form id="ajukanForm" novalidate>
+                <div class="field">
+                    <label>Jenis Pengajuan</label>
+                    <div class="radio-toggle-group">
+                        <input type="radio" name="jenisPengajuan" id="jenisIzin" value="Izin" checked>
+                        <label for="jenisIzin">Izin</label>
+                        <input type="radio" name="jenisPengajuan" id="jenisTukar" value="Tukar Shift">
+                        <label for="jenisTukar">Tukar Shift</label>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label for="tglShiftInput">Tanggal Shift</label>
+                    <input type="date" id="tglShiftInput" required>
+                </div>
+
+                <div class="info-auto" id="shiftInfoAuto">Shift Anda: —</div>
+
+                <div class="conditional-fields" id="tukarFields">
+                    <div class="field">
+                        <label for="tukarDenganSelect">Tukar dengan Karyawan</label>
+                        <select id="tukarDenganSelect">
+                            <option value="">Pilih rekan kerja</option>
+                        </select>
+                        <div class="field-error-text" id="tukarDenganError">Tidak bisa memilih diri sendiri.</div>
+                    </div>
+                    <div class="field">
+                        <label for="shiftTujuanSelect">Shift Tujuan</label>
+                        <select id="shiftTujuanSelect">
+                            <option value="">Pilih shift tujuan</option>
+                            <option value="Pagi (09.00–15.00)">Pagi (09.00–15.00)</option>
+                            <option value="Siang (15.00–21.00)">Siang (15.00–21.00)</option>
+                            <option value="Malam (21.00–03.30)">Malam (21.00–03.30)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label for="alasanTextarea">Alasan Pengajuan</label>
+                    <textarea id="alasanTextarea"
+                        placeholder="Jelaskan alasan pengajuan Anda (minimal 10 karakter)..."></textarea>
+                    <div class="char-count" id="alasanCount">0 karakter</div>
+                </div>
+
+                <button type="submit" class="btn-submit" id="ajukanSubmitBtn" disabled>Kirim Pengajuan</button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- =========================================================
+     MODAL — Wizard Form Tambah Karyawan (Halaman 6, sisi Supervisor)
+     ========================================================= -->
+    <div class="wizard-overlay" id="wizardOverlay">
+        <div class="wizard-box">
+            <nav class="wizard-steps">
+                <h4>Tambah Karyawan</h4>
+                <div class="step-nav-item active" data-step="1">
+                    <div class="step-nav-dot">1</div>
+                    <div class="step-nav-text">
+                        <div class="st-title">Data Diri & Kontak</div>
+                        <div class="st-sub">Identitas dasar</div>
+                    </div>
+                </div>
+                <div class="step-nav-item" data-step="2">
+                    <div class="step-nav-dot">2</div>
+                    <div class="step-nav-text">
+                        <div class="st-title">Data Kepegawaian</div>
+                        <div class="st-sub">Jabatan & akses</div>
+                    </div>
+                </div>
+                <div class="step-nav-item" data-step="3">
+                    <div class="step-nav-dot">3</div>
+                    <div class="step-nav-text">
+                        <div class="st-title">Dokumen & Konfirmasi</div>
+                        <div class="st-sub">Review & simpan</div>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="wizard-main">
+                <div class="wizard-header">
+                    <h3>Daftarkan Karyawan Baru</h3>
+                    <button class="drawer-close" id="wizardClose">×</button>
+                </div>
+                <div class="wizard-mobile-progress">
+                    <div class="bar">
+                        <div class="bar-fill" id="wizardProgressFill" style="width:33.33%;"></div>
+                    </div>
+                    <div class="lbl" id="wizardProgressLbl">Step 1 dari 3 — Data Diri & Kontak</div>
+                </div>
+
+                <div class="wizard-body">
+                    <!-- STEP 1 -->
+                    <div class="wizard-step-panel active" data-panel="1">
+                        <div class="field">
+                            <label for="empName">Nama Lengkap</label>
+                            <input type="text" id="empName" placeholder="Nama lengkap karyawan">
+                            <div class="field-error-text" id="empNameError">Nama lengkap wajib diisi.</div>
+                        </div>
+                        <div class="form-row">
+                            <div class="field">
+                                <label for="empBirth">Tanggal Lahir</label>
+                                <input type="date" id="empBirth">
+                                <div class="field-error-text" id="empBirthError">Tanggal lahir wajib diisi.</div>
+                            </div>
+                            <div class="field">
+                                <label>Jenis Kelamin</label>
+                                <div class="radio-inline">
+                                    <label><input type="radio" name="gender" value="Laki-laki" checked>
+                                        Laki-laki</label>
+                                    <label><input type="radio" name="gender" value="Perempuan"> Perempuan</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="field">
+                                <label for="empEmail">Email</label>
+                                <input type="text" id="empEmail" placeholder="nama@kopinako.com">
+                                <div class="field-error-text" id="empEmailError">Email wajib diisi.</div>
+                            </div>
+                            <div class="field">
+                                <label for="empPhone">Nomor Telepon</label>
+                                <input type="text" id="empPhone" placeholder="08xx-xxxx-xxxx">
+                                <div class="field-error-text" id="empPhoneError">Nomor telepon wajib diisi.</div>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label for="empAddress">Alamat</label>
+                            <textarea id="empAddress" placeholder="Alamat lengkap domisili"></textarea>
+                            <div class="field-error-text" id="empAddressError">Alamat wajib diisi.</div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 2 -->
+                    <div class="wizard-step-panel" data-panel="2">
+                        <div class="form-row">
+                            <div class="field">
+                                <label for="empIdCode">ID Karyawan</label>
+                                <input type="text" id="empIdCode" readonly>
+                            </div>
+                            <div class="field">
+                                <label for="empJoinDate">Tanggal Bergabung</label>
+                                <input type="date" id="empJoinDate">
+                                <div class="field-error-text" id="empJoinDateError">Tanggal bergabung wajib diisi.</div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="field">
+                                <label for="empPosition">Jabatan</label>
+                                <select id="empPosition">
+                                    <option value="">Pilih jabatan</option>
+                                    <option>Barista</option>
+                                    <option>Kasir</option>
+                                    <option>Kitchen</option>
+                                    <option>Leader/Head</option>
+                                    <option>Supervisor</option>
+                                </select>
+                                <div class="field-error-text" id="empPositionError">Jabatan wajib dipilih.</div>
+                            </div>
+                            <div class="field">
+                                <label for="empRole">Role Akses Sistem</label>
+                                <select id="empRole">
+                                    <option value="">Pilih role akses</option>
+                                    <option>Karyawan</option>
+                                    <option>Leader/Head</option>
+                                    <option>Supervisor</option>
+                                </select>
+                                <div class="field-error-text" id="empRoleError">Role akses wajib dipilih.</div>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label for="empShift">Shift Default</label>
+                            <select id="empShift">
+                                <option value="">Pilih shift default</option>
+                                <option>Pagi</option>
+                                <option>Siang</option>
+                                <option>Malam</option>
+                                <option>Fleksibel</option>
+                            </select>
+                            <div class="field-error-text" id="empShiftError">Shift default wajib dipilih.</div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 3 -->
+                    <div class="wizard-step-panel" data-panel="3">
+                        <div class="field">
+                            <label>Foto Profil</label>
+                            <div class="dropzone" id="dzPhoto" data-label="Foto profil">
+                                <div class="dz-ic">🖼</div>
+                                <div class="dz-text">Klik atau seret file ke sini</div>
+                                <div class="dz-sub">PNG/JPG, maks 2MB (simulasi)</div>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label>KTP / Dokumen Identitas</label>
+                            <div class="dropzone" id="dzDoc" data-label="Dokumen identitas">
+                                <div class="dz-ic">🪪</div>
+                                <div class="dz-text">Klik atau seret file ke sini</div>
+                                <div class="dz-sub">PDF/JPG, maks 5MB (simulasi)</div>
+                            </div>
+                        </div>
+
+                        <div class="review-box">
+                            <h5>Ringkasan Data Diri</h5>
+                            <div id="reviewStep1"></div>
+                        </div>
+                        <div class="review-box">
+                            <h5>Ringkasan Data Kepegawaian</h5>
+                            <div id="reviewStep2"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wizard-footer">
+                    <button class="btn-toolbar btn-ghost" id="wizardDraftBtn">Simpan sebagai Draft</button>
+                    <div class="spacer"></div>
+                    <button class="btn-toolbar btn-outline" id="wizardPrevBtn" style="display:none;">Sebelumnya</button>
+                    <button class="btn-toolbar btn-dark" id="wizardNextBtn">Selanjutnya</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================
+     TOAST NOTIFIKASI (shared)
+     ========================================================= -->
+    <div class="toast-wrap" id="toastWrap"></div>
+
+    <!-- =========================================================
+     MODAL — Konfirmasi Logout (shared)
+     ========================================================= -->
+    <div class="modal-overlay" id="logoutModal">
+        <div class="modal-box">
+            <h3>Keluar dari akun?</h3>
+            <p>Anda perlu masuk kembali untuk mengakses dashboard.</p>
+            <div class="modal-actions">
+                <button class="btn btn-outline" id="cancelLogout">Batal</button>
+                <button class="btn btn-danger" id="confirmLogout">Ya, Keluar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
